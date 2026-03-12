@@ -6,6 +6,9 @@ import PersonalInfoForm from '../components/PersonalInfoForm'
 import ResumePreview from '../components/ResumePreview'
 import TemplateSelector from '../components/TemplateSelector'
 import ColorPicker from '../components/ColorPicker'
+import ProfessionalSummaryForm from '../components/ProfessionalSummaryForm'
+import ExperienceForm from '../components/ExperienceForm'
+import EducationForm from '../components/EducationForm'
 
 const ResumeBuilder = () => {
   
@@ -54,9 +57,10 @@ const ResumeBuilder = () => {
   return (
     <div>
       <div className='max-w-7xl mx-auto px-4 py-6'>
-        <Link to={'/app'}>
-        <ArrowLeftIcon className='size-4'/> Back to Dashboard
-        </Link>
+      <Link to="/app" className="flex items-center gap-2 text-gray-600 hover:text-black">
+  <ArrowLeftIcon className="size-4"/>
+  Back to Dashboard
+  </Link>
       </div>
 
 
@@ -67,7 +71,7 @@ const ResumeBuilder = () => {
             <div className='bg-white rounded-lg shadow-sm border border-gray-200 p-6 pt-1'>
                 {/* progress bar using activeSectionIndex */}
                 <hr className='absolute top-0 left-0 right-0 border-2 border-gray-200'/>
-                <hr className='absolute top-0 left-0 h-1 bg-gradient-to-r from-green-500 to-green-600 border-none transition-all duration-2000'
+                <hr className='absolute top-0 left-0 h-1 bg-gradient-to-r from-green-500 to-green-600 border-none transition-all duration-500'
                 style={{width:`${activeSectionIndex * 100 / (sections.length-1)}%`}}/>
 
                 {/* Section Navigation */}
@@ -109,13 +113,31 @@ const ResumeBuilder = () => {
 
   </div>
 </div>
-
                 {/*Form Content*/}
                 <div className='space-y-6'>
                      {activeSection.id ==='personal' && (
                       <PersonalInfoForm data={resumeData.personal_info}  onChange={(data)=>setResumeData(prev=>({...prev,personal_info:data}))} removeBackground={removeBackground}
                       setRemoveBackground={setRemoveBackground}/>
                      )}
+                     {activeSection.id === "summary" && (
+                     <ProfessionalSummaryForm
+                       data={resumeData.professional_summary}
+                         onChange={(data) =>
+                         setResumeData((prev) => ({
+                         ...prev,
+                         professional_summary: data,
+                            }))
+                         }
+                      />
+                      )}
+                     {activeSection.id==='experience' && (
+                      <ExperienceForm data={resumeData.experience} onChange={(data)=>setResumeData(prev=>({...prev,experience:data}))} />
+                     )}
+                     
+                      {activeSection.id==='education' && (
+                      <EducationForm data={resumeData.education} onChange={(data)=>setResumeData(prev=>({...prev,education:data}))} />
+                     )}
+                     
                 </div>
 
             </div>
