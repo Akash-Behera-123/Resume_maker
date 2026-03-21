@@ -2,9 +2,16 @@ import {FilePenLineIcon, Pencil, PencilIcon, PlusIcon, TrashIcon, UploadCloud, U
 import React, { useEffect, useState } from 'react'
 import { dummyResumeData } from '../assets/assets'
 import { useNavigate } from 'react-router-dom'
+import { useSelector } from 'react-redux'
+import api from '../configs/api'
+import toast from 'react-hot-toast'
 
 
 const Dashboard = () => {
+  
+  const {user,token} = useSelector(state => state.auth)
+
+
   const colors =["#9333ea","#d97706","#dc2626","#0284c7","#16a34a"]
   const[allResumes,setAllResumes]=useState([])
   const[showCreateResume,setshowCreateResume]=useState(false)
@@ -19,9 +26,18 @@ const Dashboard = () => {
     setAllResumes(dummyResumeData)
   }
   const createResume=async (event)=>{
-    event.preventDefault()
-    setshowCreateResume(false)
-    navigate(`/app/builder/res123`)
+    try {
+      event.preventDefault()
+      const {data}= await api.post('/api/resumes/create',{title},{headers:{
+        Authorization:`Bearer ${token}`
+      }})
+      setAllResumes([...allResumes,data.resume])
+      setTitle('')
+      setshowCreateResume(false)
+      navigate(`/app/builder/${data.resume._id}`)
+    } catch (error) {
+      toast.error(error?.response?.data?.message || error.message)
+    }
 
   }
   const uploadResume=async(event)=>{
