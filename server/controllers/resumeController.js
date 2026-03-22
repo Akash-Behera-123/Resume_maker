@@ -2,8 +2,9 @@ import imagekit from "../configs/imageKit.js";
 import Resume from "../models/Resume.js";
 import fs from 'fs';
 
-// controller for creating a new resume
-// POST: /api/resumes/create
+// --------------------
+// CREATE RESUME
+// --------------------
 export const createResume = async (req,res) => {
     try {
         const userId = req.userId;
@@ -22,8 +23,9 @@ export const createResume = async (req,res) => {
 }
 
 
-// controller for deleting a resume
-// DELETE: /api/resumes/delete/:resumeId
+// --------------------
+// DELETE RESUME
+// --------------------
 export const deleteResume = async (req,res) => {
     try {
         const userId = req.userId;
@@ -45,8 +47,9 @@ export const deleteResume = async (req,res) => {
 }
 
 
-// get user resume by id
-// GET: /api/resumes/get/:resumeId
+// --------------------
+// GET RESUME (PRIVATE)
+// --------------------
 export const getResumeById = async (req,res) => {
     try {
         const userId = req.userId;
@@ -58,7 +61,6 @@ export const getResumeById = async (req,res) => {
             return res.status(404).json({ message: "Resume not found" });
         }
 
-        // remove unwanted fields
         resume.__v = undefined;
         resume.createdAt = undefined;
         resume.updatedAt = undefined;
@@ -71,8 +73,9 @@ export const getResumeById = async (req,res) => {
 }
 
 
-// get public resume by id
-// GET: /api/resumes/public/:resumeId
+// --------------------
+// GET PUBLIC RESUME
+// --------------------
 export const getPublicResumeById = async (req,res)=>{
     try {
         const { resumeId } = req.params;
@@ -91,8 +94,9 @@ export const getPublicResumeById = async (req,res)=>{
 }
 
 
-// controller for updating a resume
-// PUT: /api/resumes/update
+// --------------------
+// UPDATE RESUME (FIXED)
+// --------------------
 export const updateResume = async (req,res)=>{
     try {
         const userId = req.userId;
@@ -101,14 +105,18 @@ export const updateResume = async (req,res)=>{
 
         let resumeDataCopy;
 
-        // parse JSON safely
-        try {
-            resumeDataCopy = JSON.parse(resumeData);
-        } catch {
-            return res.status(400).json({ message: "Invalid JSON data" });
+        // ✅ FIX: handle both string (FormData) and object (JSON)
+        if (typeof resumeData === "string") {
+            try {
+                resumeDataCopy = JSON.parse(resumeData);
+            } catch {
+                return res.status(400).json({ message: "Invalid JSON data" });
+            }
+        } else {
+            resumeDataCopy = resumeData;
         }
 
-        // handle image upload
+        // ✅ IMAGE UPLOAD (UNCHANGED)
         if (image) {
             const imageBufferData = fs.createReadStream(image.path);
 
@@ -121,7 +129,6 @@ export const updateResume = async (req,res)=>{
                 }
             });
 
-            // ensure structure exists
             if (!resumeDataCopy.personal_info) {
                 resumeDataCopy.personal_info = {};
             }
@@ -132,7 +139,7 @@ export const updateResume = async (req,res)=>{
         const resume = await Resume.findOneAndUpdate(
             { userId, _id: resumeId },
             resumeDataCopy,
-            { new: true }
+            { returnDocument: 'after' }
         );
 
         if (!resume) {
