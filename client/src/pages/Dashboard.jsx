@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom'
 import { useSelector } from 'react-redux'
 import api from '../configs/api'
 import toast from 'react-hot-toast'
+import pdfToText from 'react-pdftotext'
 
 const Dashboard = () => {
   
@@ -36,21 +37,34 @@ const Dashboard = () => {
   const createResume = async (event)=>{
     try {
       event.preventDefault()
-
+      
+      if (!title.trim()) {
+        return toast.error("Please enter a resume title")
+      }
+      
+      setIsLoading(true)
+      
       const {data}= await api.post('/api/resumes/create',{title},{
         headers:{
           Authorization:`Bearer ${token}`
         }
       })
 
-      setAllResumes(prev => [...prev, data.resume]) // ✅ FIXED
-      setTitle('')
-      setshowCreateResume(false)
-
-      navigate(`/app/builder/${data.resume._id}`)
+      if (data && data.resume && data.resume._id) {
+        setAllResumes(prev => [data.resume, ...prev])
+        setTitle('')
+        setshowCreateResume(false)
+        toast.success("Resume created successfully!")
+        navigate(`/app/builder/${data.resume._id}`)
+      } else {
+        toast.error("Failed to create resume")
+      }
 
     } catch (error) {
+      console.error('Create error:', error)
       toast.error(error?.response?.data?.message || error.message)
+    } finally {
+      setIsLoading(false)
     }
   }
 
@@ -64,16 +78,18 @@ const Dashboard = () => {
     setIsLoading(true)
 
     try {
-      const formData = new FormData()
-      formData.append("title", title)
-      formData.append("resume", resume)
+      const resumeText = await pdfToText(resume)
+      console.log("TEXT:", resumeText);
 
-      const {data}= await api.post('/api/ai/upload-resume', formData, {
+  if (!resumeText || !resumeText.trim()) {
+    throw new Error("Empty resume text");
+  }
+      const {data}= await api.post('/api/ai/upload-resume',{title,resumeText}, {
         headers:{
           Authorization:`Bearer ${token}`
+          
         }
       })
-
       setTitle('')
       setResume(null)
       setshowUploadResume(false)
@@ -83,7 +99,7 @@ const Dashboard = () => {
     } catch (error) {
       toast.error(error?.response?.data?.message || error.message)
     } finally {
-      setIsLoading(false) // ✅ FIXED
+      setIsLoading(false)
     }
   }
 
@@ -144,15 +160,17 @@ const Dashboard = () => {
   }
 
   useEffect(()=>{
-     loadAllResumes()
-  },[token]) // ✅ FIXED
+     if(token) {
+       loadAllResumes()
+     }
+  },[token])
 
   return (
     <div>
       <div className='max-w-7xl mx-auto px-4 py-8'>
 
          <p className='text-2xl font-medium mb-6 bg-gradient-to-r from-slate-600 to-slate-700 bg-clip-text text-transparent sm:hidden'>
-           Welcome,{user?.name}
+           Welcome, {user?.name}
          </p>
          
          <div className='flex gap-4'>
@@ -170,7 +188,12 @@ const Dashboard = () => {
          <hr className='border-slate-300 my-6 sm:w-[305px]'/>
 
          <div className="grid grid-cols-2 sm:flex flex-wrap gap-4">
-           {allResumes.map((resume,index)=>{
+           {allResumes.length === 0 ? (
+             <p className="text-gray-500 col-span-full text-center py-8">
+               No resumes yet. Click "Create Resume" to get started!
+             </p>
+           ) : (
+             allResumes.map((resume,index)=>{
                const baseColor = colors[index % colors.length];
                return (
                 <button key={resume._id} onClick={()=>navigate(`/app/builder/${resume._id}`)} className='relative w-full sm:max-w-36 h-48 flex flex-col items-center justify-center rounded-lg gap-2 border group hover:shadow-lg transition-all duration-300 cursor-pointer' style={{background: `linear-gradient(135deg, ${baseColor}10,${baseColor}40)`,borderColor:baseColor+'40'}}>
@@ -180,17 +203,19 @@ const Dashboard = () => {
                       </p>
 
                       <div onClick={e=>e.stopPropagation()} className='absolute top-1 right-1 hidden group-hover:flex items-center'>
-                       <TrashIcon onClick={() => deleteResume(resume._id)} className="size-7 p-1.5 hover:bg-white/50 rounded"/>
-                       <PencilIcon onClick={()=> {setEditResumeId(resume._id); setTitle(resume.title)}} className="size-7 p-1.5 hover:bg-white/50 rounded"/>
+                       <TrashIcon onClick={() => deleteResume(resume._id)} className="size-7 p-1.5 hover:bg-white/50 rounded cursor-pointer"/>
+                       <PencilIcon onClick={()=> {setEditResumeId(resume._id); setTitle(resume.title)}} className="size-7 p-1.5 hover:bg-white/50 rounded cursor-pointer"/>
                       </div>
                 </button>
                )
-           })}
+             })
+           )}
          </div>
 
+         {/* Upload Resume Modal */}
          {showUploadResume && (
-            <form onSubmit={uploadResume} onClick={()=> setshowUploadResume(false)} className='fixed inset-0 bg-black/70 flex items-center justify-center'>
-              <div onClick={e =>e.stopPropagation()} className='bg-white rounded-lg w-full max-w-sm p-6'>
+            <form onSubmit={uploadResume} onClick={()=> setshowUploadResume(false)} className='fixed inset-0 bg-black/70 flex items-center justify-center z-50'>
+              <div onClick={e => e.stopPropagation()} className='bg-white rounded-lg w-full max-w-sm p-6'>
                 <h2 className='text-xl mb-4'>Upload Resume</h2>
 
                 <input 
@@ -198,7 +223,7 @@ const Dashboard = () => {
                   value={title} 
                   type='text' 
                   placeholder='Enter resume title' 
-                  className='w-full px-4 py-2 mb-4 border' 
+                  className='w-full px-4 py-2 mb-4 border rounded' 
                   required
                 />
 
@@ -206,18 +231,20 @@ const Dashboard = () => {
                   type="file" 
                   accept='.pdf' 
                   onChange={(e)=>setResume(e.target.files[0])} 
+                  className='mb-4'
                 />
 
-                <button className='w-full py-2 bg-green-600 text-white rounded mt-4'>
+                <button type="submit" className='w-full py-2 bg-green-600 text-white rounded mt-2'>
                   {isLoading ? "Uploading..." : "Upload Resume"}
                 </button>
               </div>
             </form>
          )}
 
+         {/* Edit Title Modal */}
          {editResumeId && (
-            <form onSubmit={editTitle} onClick={()=> setEditResumeId('')} className='fixed inset-0 bg-black/70 flex items-center justify-center'>
-              <div onClick={e =>e.stopPropagation()} className='bg-white rounded-lg w-full max-w-sm p-6'>
+            <form onSubmit={editTitle} onClick={()=> setEditResumeId('')} className='fixed inset-0 bg-black/70 flex items-center justify-center z-50'>
+              <div onClick={e => e.stopPropagation()} className='bg-white rounded-lg w-full max-w-sm p-6'>
                 <h2 className='text-xl mb-4'>Edit Resume Title</h2>
 
                 <input 
@@ -225,7 +252,7 @@ const Dashboard = () => {
                   value={title} 
                   type='text' 
                   placeholder='Enter resume title' 
-                  className='w-full px-4 py-2 mb-4 border' 
+                  className='w-full px-4 py-2 mb-4 border rounded' 
                   required
                 />
 
@@ -234,6 +261,47 @@ const Dashboard = () => {
                 </button>
               </div>
             </form>
+         )}
+
+         {/* ✅ CREATE RESUME MODAL - THIS WAS MISSING */}
+         {showCreateResume && (
+            <div onClick={() => setshowCreateResume(false)} className='fixed inset-0 bg-black/70 flex items-center justify-center z-50'>
+              <form onSubmit={createResume} onClick={e => e.stopPropagation()} className='bg-white rounded-lg w-full max-w-sm p-6'>
+                <h2 className='text-xl mb-4'>Create New Resume</h2>
+                
+                <input 
+                  onChange={(e) => setTitle(e.target.value)} 
+                  value={title} 
+                  type='text' 
+                  placeholder='Enter resume title' 
+                  className='w-full px-4 py-2 mb-4 border rounded focus:outline-none focus:ring-2 focus:ring-indigo-500' 
+                  required
+                  autoFocus
+                  disabled={isLoading}
+                />
+                
+                <div className='flex gap-2'>
+                  <button 
+                    type="button" 
+                    onClick={() => {
+                      setshowCreateResume(false)
+                      setTitle('')
+                    }} 
+                    className='flex-1 py-2 bg-gray-200 text-gray-800 rounded hover:bg-gray-300 transition'
+                    disabled={isLoading}
+                  >
+                    Cancel
+                  </button>
+                  <button 
+                    type="submit" 
+                    disabled={isLoading || !title.trim()} 
+                    className='flex-1 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700 transition disabled:opacity-50 disabled:cursor-not-allowed'
+                  >
+                    {isLoading ? "Creating..." : "Create Resume"}
+                  </button>
+                </div>
+              </form>
+            </div>
          )}
 
       </div>
