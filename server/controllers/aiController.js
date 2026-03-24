@@ -79,100 +79,92 @@ export const enhanceJobDescription = async (req, res) => {
 // --------------------
 export const uploadResume = async (req, res) => {
   try {
-    const userId = req.userId;
-    const { title } = req.body;
-    const file = req.file;
+      const {resumeText,title} = req.body;
+      const userId = req.userId;
 
-    if (!file) {
-      return res.status(400).json({ message: "No file uploaded" });
-    }
+      if(!resumeText || typeof resumeText !== "string" || !resumeText.trim()){
+         return res.status(400).json({ message: "Missing required fields" });
+      }
+      const systemPrompt ="You are an expert AI Agent to extract data from resume."
+      const userPrompt= `extract data from this resume : ${resumeText}
+      Provide data in the following JSON format with no additional text before or after:
+      {
+      
+    professionalSummary: { type: String, default: '' },
 
-    // ✅ Use stable Node-compatible parser
-    const pdfParse = (await import("pdf-parse-fixed")).default;
+    skills: [{ type: String, default: '' }],
 
-    const pdfData = await pdfParse(file.buffer);
-    const resumeText = pdfData.text;
+    personalInfo: {
+        image: { type: String, default: '' },
+        fullName: { type: String, default: '' },
+        profession: { type: String, default: '' },
+        email: { 
+            type: String, 
+            default: '',
+            match: [/^\S+@\S+\.\S+$/, 'Invalid email']
+        },
+        phone: { type: String, default: '' },
+        location: { type: String, default: '' },
+        linkedin: { type: String, default: '' },
+        website: { type: String, default: '' },
+    },
 
-    if (!resumeText) {
-      return res.status(400).json({ message: "Could not extract text" });
-    }
+    experience: [
+        {
+            company: { type: String, default: '' },
+            position: { type: String, default: '' },
+            startDate: { type: String, default: '' },
+            endDate: { type: String, default: '' },
+            description: { type: String, default: '' },
+            isCurrent: { type: Boolean, default: false },
+        }
+    ],
 
-    const systemPrompt =
-      "You are an expert AI Agent to extract structured data from resumes.";
+    projects: [
+        {
+            name: { type: String, default: '' },
+            type: { type: String, default: '' },
+            description: { type: String, default: '' },
+        }
+    ],
 
-    const userPrompt = `extract data from this resume: ${resumeText}
+    education: [
+        {
+            institution: { type: String, default: '' },
+            degree: { type: String, default: '' },
+            field: { type: String, default: '' },
+            graduationDate: { type: String, default: '' },
+            gpa: { type: String, default: '' },
+        }
+    ],
 
-Return ONLY JSON in this format:
+      }
 
-{
-  "professionalSummary": "",
-  "skills": [],
-  "personalInfo": {
-    "image": "",
-    "fullName": "",
-    "profession": "",
-    "email": "",
-    "phone": "",
-    "location": "",
-    "linkedin": "",
-    "website": ""
-  },
-  "experience": [
-    {
-      "company": "",
-      "position": "",
-      "startDate": "",
-      "endDate": "",
-      "description": "",
-      "isCurrent": false
-    }
-  ],
-  "projects": [
-    {
-      "name": "",
-      "type": "",
-      "description": ""
-    }
-  ],
-  "education": [
-    {
-      "institution": "",
-      "degree": "",
-      "field": "",
-      "graduationDate": "",
-      "gpa": ""
-    }
-  ]
-}`;
+      `
 
     const response = await ai.chat.completions.create({
       model: process.env.OPENAI_MODEL,
       messages: [
-        { role: "system", content: systemPrompt },
-        { role: "user", content: userPrompt },
+        {
+          role: "system",
+          content:
+            systemPrompt
+        },
+        {
+          role: "user",
+          content: userPrompt
+        },
       ],
-      response_format: { type: "json_object" },
+      response_format:  {type:'json_object'}
     });
 
     const extractedData =
-      response?.choices?.[0]?.message?.content?.trim() || "{}";
+      response?.choices?.[0]?.message?.content ;
+      const  parseData =JSON.parse(extractedData)
+      const newResume = await Resume.create({userId,title,...parseData})
 
-    let parseData = {};
 
-    try {
-      parseData = JSON.parse(extractedData);
-    } catch (err) {
-      return res.status(500).json({ message: "Invalid JSON from AI" });
-    }
-
-    const newResume = await Resume.create({
-      userId,
-      title,
-      ...parseData,
-    });
-
-    return res.json({ resumeId: newResume._id });
-
+     res.json({ resumeId: newResume._id });
   } catch (error) {
     return res.status(500).json({ message: error.message });
   }

@@ -98,60 +98,36 @@ export const getPublicResumeById = async (req,res)=>{
 // UPDATE RESUME (FIXED)
 // --------------------
 export const updateResume = async (req,res)=>{
+     
     try {
         const userId = req.userId;
-        const { resumeId, resumeData, removeBackground } = req.body;
-        const image = req.file;
+        const {resumeId,resumeData,removeBackground} = req.body
 
-        let resumeDataCopy;
+        const image= req.file;
 
-        // ✅ FIX: handle both string (FormData) and object (JSON)
-        if (typeof resumeData === "string") {
-            try {
-                resumeDataCopy = JSON.parse(resumeData);
-            } catch {
-                return res.status(400).json({ message: "Invalid JSON data" });
-            }
-        } else {
-            resumeDataCopy = resumeData;
-        }
 
-        // ✅ IMAGE UPLOAD (UNCHANGED)
-        if (image) {
-            const imageBufferData = fs.createReadStream(image.path);
+        let resumeDataCopy = JSON.parse(JSON.stringify(resumeData));
 
-            const response = await imagekit.files.upload({
-                file: imageBufferData,
-                fileName: 'resume.png',
-                folder: 'user-resumes',
-                transformation: {
-                    pre: 'w-300,h-300,fo-face,z-0.75' + (removeBackground ? ',e-bgremove' : '')
+        if(image){
+
+            const imageBufferData =fs.createReadStream(image.path)
+            const response = await imagekit.files.uploaded({
+                file:imageBufferData,
+                fileName:'resume.png',
+                folder:'user-resumes',
+                transformation:{
+                    pre:'w-300,h-300,fo-face,z-0.75'+(removeBackground ? ',e-bgremove' : '')
                 }
             });
-
-            if (!resumeDataCopy.personal_info) {
-                resumeDataCopy.personal_info = {};
-            }
-
-            resumeDataCopy.personal_info.image = response.url;
+            resumeDataCopy.personal_info.image=response.url
         }
+        const resume= await Resume.findByIdAndUpdate({userId,_id:resumeId},resumeDataCopy,{new:true})
 
-        const resume = await Resume.findOneAndUpdate(
-            { userId, _id: resumeId },
-            resumeDataCopy,
-            { returnDocument: 'after' }
-        );
-
-        if (!resume) {
-            return res.status(404).json({ message: "Resume not found" });
-        }
-
-        return res.status(200).json({
-            message: 'Saved successfully',
-            resume
-        });
-
+        return res.status(200).json({message:'saved successfully',resume})
     } catch (error) {
-        res.status(500).json({ message: "Server error" });
+        res.status(500).json({ message:error.message });
     }
+
+
+
 }
