@@ -7,14 +7,14 @@ import {
   getResumeById,
   updateResume
 } from "../controllers/resumeController.js";
-
+import upload from "../configs/multer.js";
 const resumeRouter = express.Router();
 
 // CREATE
 resumeRouter.post('/create', protect, createResume);
 
 // ✅ FIXED: removed multer (THIS WAS CAUSING ERROR)
-resumeRouter.put('/update', protect, updateResume);
+resumeRouter.put('/update', upload.single('image'), protect, updateResume);
 
 // DELETE
 resumeRouter.delete('/delete/:resumeId', protect, deleteResume);
