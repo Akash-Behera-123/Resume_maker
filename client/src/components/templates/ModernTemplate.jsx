@@ -2,7 +2,7 @@ import { Mail, Phone, MapPin, Linkedin, Globe } from "lucide-react";
 
 const ModernTemplate = ({ data, accentColor }) => {
   const formatDate = (dateStr) => {
-    if (!dateStr) return "";
+    if (!dateStr || !dateStr.includes("-")) return "";
     const [year, month] = dateStr.split("-");
     return new Date(year, month - 1).toLocaleDateString("en-US", {
       year: "numeric",
@@ -158,18 +158,22 @@ const ModernTemplate = ({ data, accentColor }) => {
           </section>
         )}
 
-        <div className="grid sm:grid-cols-2 gap-8">
+        {/* EDUCATION */}
+        {data.education?.length > 0 && (
+          <section className="mb-10">
+            <h2
+              className="text-2xl font-light mb-4 pb-2 border-b border-gray-200"
+              style={{ color: accentColor }}
+            >
+              Education
+            </h2>
 
-          {/* EDUCATION */}
-          {data.education?.length > 0 && (
-            <section>
-              <h2 className="text-2xl font-light mb-4 pb-2 border-b border-gray-200">
-                Education
-              </h2>
+            <div className="space-y-4">
+              {data.education.map((edu, index) => (
+                <div key={index} className="flex justify-between items-start">
 
-              <div className="space-y-4">
-                {data.education.map((edu, index) => (
-                  <div key={index}>
+                  {/* LEFT */}
+                  <div>
                     <h3 className="font-semibold text-gray-900">
                       {edu.degree} {edu.field && `in ${edu.field}`}
                     </h3>
@@ -177,38 +181,46 @@ const ModernTemplate = ({ data, accentColor }) => {
                     <p style={{ color: accentColor }}>
                       {edu.institution}
                     </p>
-
-                    <div className="flex justify-between text-sm text-gray-600">
-                      <span>{formatDate(edu.graduationDate)}</span>
-                      {edu.gpa && <span>GPA: {edu.gpa}</span>}
-                    </div>
                   </div>
-                ))}
-              </div>
-            </section>
-          )}
 
-          {/* SKILLS */}
-          {data.skills?.length > 0 && (
-            <section>
-              <h2 className="text-2xl font-light mb-4 pb-2 border-b border-gray-200">
-                Skills
-              </h2>
+                  {/* RIGHT (DATE + CGPA) */}
+                  <div className="text-right text-sm text-gray-600">
+                    <div>{formatDate(edu.graduationDate)}</div>
 
-              <div className="flex flex-wrap gap-2">
-                {data.skills.map((skill, index) => (
-                  <span
-                    key={index}
-                    className="px-3 py-1 text-sm text-white rounded-full"
-                    style={{ backgroundColor: accentColor }}
-                  >
-                    {skill}
-                  </span>
-                ))}
-              </div>
-            </section>
-          )}
-        </div>
+                    {edu.gpa && (
+                      <div
+                        className="font-medium"
+                        style={{ color: accentColor }}
+                      >
+                        CGPA: {edu.gpa}
+                      </div>
+                    )}
+                  </div>
+
+                </div>
+              ))}
+            </div>
+          </section>
+        )}
+
+        {/* SKILLS BELOW EDUCATION */}
+        {data.skills?.length > 0 && (
+          <section>
+            <h2
+              className="text-2xl font-light mb-4 pb-2 border-b border-gray-200"
+              style={{ color: accentColor }}
+            >
+              Skills
+            </h2>
+
+            <div className="flex flex-wrap gap-3 text-gray-700">
+              {data.skills.map((skill, index) => (
+                <span key={index}>{skill}</span>
+              ))}
+            </div>
+          </section>
+        )}
+
       </div>
     </div>
   );

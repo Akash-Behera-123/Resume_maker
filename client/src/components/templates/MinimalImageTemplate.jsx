@@ -2,7 +2,7 @@ import { Mail, Phone, MapPin } from "lucide-react";
 
 const MinimalImageTemplate = ({ data, accentColor }) => {
   const formatDate = (dateStr) => {
-    if (!dateStr) return "";
+    if (!dateStr || !dateStr.includes("-")) return "";
     const [year, month] = dateStr.split("-");
     return new Date(year, month - 1).toLocaleDateString("en-US", {
       year: "numeric",
@@ -88,10 +88,21 @@ const MinimalImageTemplate = ({ data, accentColor }) => {
                 {data.education.map((edu, index) => (
                   <div key={index}>
                     <p className="font-semibold uppercase">{edu.degree}</p>
-                    <p className="text-zinc-600">{edu.institution}</p>
-                    <p className="text-xs text-zinc-500">
-                      {formatDate(edu.graduationDate)}
-                    </p>
+
+                    {/* ✅ SAME ROW: INSTITUTE LEFT + DATE + CGPA RIGHT */}
+                    <div className="flex justify-between items-center text-zinc-600">
+                      <span>{edu.institution}</span>
+
+                      <span className="text-xs text-zinc-500 text-right">
+                        {formatDate(edu.graduationDate)}
+                        {edu.gpa && (
+                          <span style={{ color: accentColor }}>
+                            {" "}  CGPA: {edu.gpa}
+                          </span>
+                        )}
+                      </span>
+                    </div>
+
                   </div>
                 ))}
               </div>
