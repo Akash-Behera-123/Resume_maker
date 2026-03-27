@@ -16,7 +16,7 @@ await connectDB()
 
 app.use(express.json())
 app.use(cors({
-    origin:"https://resume-maker-pink-eta.vercel.app",
+    origin:"https://resume-maker-pink-eta.vercel.app/",
     credentials:true
 }))
 
