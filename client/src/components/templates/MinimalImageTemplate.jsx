@@ -1,6 +1,8 @@
 import { Mail, Phone, MapPin } from "lucide-react";
 
 const MinimalImageTemplate = ({ data, accentColor }) => {
+  const color = accentColor || "#4f46e5"; // ✅ safe fallback
+
   const formatDate = (dateStr) => {
     if (!dateStr || !dateStr.includes("-")) return "";
     const [year, month] = dateStr.split("-");
@@ -12,23 +14,27 @@ const MinimalImageTemplate = ({ data, accentColor }) => {
 
   const personal = data.personalInfo || {};
 
+  // ✅ FIX: normalize image (File + URL both supported)
+  const image =
+    typeof personal.image === "string"
+      ? personal.image
+      : personal.image instanceof File
+      ? URL.createObjectURL(personal.image)
+      : "";
+
   return (
     <div className="max-w-5xl mx-auto bg-white text-zinc-800">
       <div className="grid grid-cols-3">
 
         {/* LEFT IMAGE */}
         <div className="col-span-1 py-10">
-          {personal.image && (
+          {image && (
             <div className="mb-6">
               <img
-                src={
-                  typeof personal.image === "string"
-                    ? personal.image
-                    : URL.createObjectURL(personal.image)
-                }
+                src={image}
                 alt="Profile"
                 className="w-32 h-32 object-cover rounded-full mx-auto"
-                style={{ background: accentColor + "70" }}
+                style={{ background: color + "70" }}
               />
             </div>
           )}
@@ -56,21 +62,21 @@ const MinimalImageTemplate = ({ data, accentColor }) => {
             <div className="space-y-2 text-sm">
               {personal.phone && (
                 <div className="flex items-center gap-2">
-                  <Phone size={14} style={{ color: accentColor }} />
+                  <Phone size={14} style={{ color }} />
                   {personal.phone}
                 </div>
               )}
 
               {personal.email && (
                 <div className="flex items-center gap-2">
-                  <Mail size={14} style={{ color: accentColor }} />
+                  <Mail size={14} style={{ color }} />
                   {personal.email}
                 </div>
               )}
 
               {personal.location && (
                 <div className="flex items-center gap-2">
-                  <MapPin size={14} style={{ color: accentColor }} />
+                  <MapPin size={14} style={{ color }} />
                   {personal.location}
                 </div>
               )}
@@ -89,20 +95,18 @@ const MinimalImageTemplate = ({ data, accentColor }) => {
                   <div key={index}>
                     <p className="font-semibold uppercase">{edu.degree}</p>
 
-                    {/* ✅ SAME ROW: INSTITUTE LEFT + DATE + CGPA RIGHT */}
                     <div className="flex justify-between items-center text-zinc-600">
                       <span>{edu.institution}</span>
 
                       <span className="text-xs text-zinc-500 text-right">
                         {formatDate(edu.graduationDate)}
                         {edu.gpa && (
-                          <span style={{ color: accentColor }}>
-                            {" "}  CGPA: {edu.gpa}
+                          <span style={{ color }}>
+                            {" "} CGPA: {edu.gpa}
                           </span>
                         )}
                       </span>
                     </div>
-
                   </div>
                 ))}
               </div>
@@ -133,7 +137,7 @@ const MinimalImageTemplate = ({ data, accentColor }) => {
             <section className="mb-8">
               <h2
                 className="text-sm font-semibold tracking-widest mb-3"
-                style={{ color: accentColor }}
+                style={{ color }}
               >
                 SUMMARY
               </h2>
@@ -149,7 +153,7 @@ const MinimalImageTemplate = ({ data, accentColor }) => {
             <section>
               <h2
                 className="text-sm font-semibold tracking-widest mb-4"
-                style={{ color: accentColor }}
+                style={{ color }}
               >
                 EXPERIENCE
               </h2>
@@ -168,7 +172,7 @@ const MinimalImageTemplate = ({ data, accentColor }) => {
                       </span>
                     </div>
 
-                    <p className="text-sm mb-2" style={{ color: accentColor }}>
+                    <p className="text-sm mb-2" style={{ color }}>
                       {exp.company}
                     </p>
 
@@ -190,7 +194,7 @@ const MinimalImageTemplate = ({ data, accentColor }) => {
             <section>
               <h2
                 className="text-sm uppercase tracking-widest font-semibold"
-                style={{ color: accentColor }}
+                style={{ color }}
               >
                 PROJECTS
               </h2>
@@ -203,10 +207,7 @@ const MinimalImageTemplate = ({ data, accentColor }) => {
                     </h3>
 
                     {project.type && (
-                      <p
-                        className="text-sm mb-1"
-                        style={{ color: accentColor }}
-                      >
+                      <p className="text-sm mb-1" style={{ color }}>
                         {project.type}
                       </p>
                     )}

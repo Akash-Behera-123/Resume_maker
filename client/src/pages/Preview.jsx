@@ -3,6 +3,7 @@ import { useParams } from "react-router-dom";
 import { dummyResumeData } from "../assets/assets";
 import ResumePreview from "../components/ResumePreview";
 import { ArrowLeftIcon, Loader } from "lucide-react";
+import api from "../configs/api";
 
 const Preview = () => {
   const { resumeId } = useParams();
@@ -10,13 +11,35 @@ const Preview = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [resumeData, setResumeData] = useState(null);
 
-  const loadResume = () => {
-    const resume =
-      dummyResumeData.find((resume) => resume._id === resumeId) || null;
+ const loadResume = async () => {
+  try {
+    const { data } = await api.get('/api/resumes/public/' + resumeId);
 
-    setResumeData(resume);
-    setIsLoading(false);
-  };
+    const r = data.resume;
+
+    setResumeData({
+      ...r,
+      // ✅ Fix accent color mismatch
+      accentColor: r.accentColor || r.accent_color,
+
+      // ✅ Fix personal info mismatch
+      personalInfo: {
+        ...(r.personalInfo || r.personal_info || {}),
+        // ✅ Fix image field mismatch
+        profileImage:
+          r.personalInfo?.profileImage ||
+          r.personalInfo?.profile_image ||
+          r.personal_info?.profileImage ||
+          r.personal_info?.profile_image ||
+          ""
+      }
+    });
+
+  } catch (error) {
+    console.log(error.message);
+  }
+  setIsLoading(false);
+};
 
   useEffect(() => {
     loadResume();

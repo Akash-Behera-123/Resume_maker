@@ -12,64 +12,85 @@ const ModernTemplate = ({ data, accentColor }) => {
 
   const personal = data.personalInfo || {};
 
+  // ✅ FIX: handle File + URL image
+  const getImageSrc = () => {
+    if (!personal.image) return null;
+    if (typeof personal.image === "string") return personal.image;
+    return URL.createObjectURL(personal.image);
+  };
+
   return (
     <div className="max-w-4xl mx-auto bg-white text-gray-800">
 
       {/* HEADER */}
-      <header className="p-8 text-white" style={{ backgroundColor: accentColor }}>
-        <h1 className="text-4xl font-light mb-3">
-          {personal.fullName || "Your Name"}
-        </h1>
+      <header
+        className="p-8 text-white flex items-center gap-6"
+        style={{ backgroundColor: accentColor }}
+      >
+        {getImageSrc() && (
+          <img
+            src={getImageSrc()}
+            alt="profile"
+            className="w-20 h-20 rounded-full object-cover border-2 border-white"
+          />
+        )}
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm">
-          {personal.email && (
-            <div className="flex items-center gap-2">
-              <Mail className="size-4" />
-              {personal.email}
-            </div>
-          )}
+        <div>
+          <h1 className="text-4xl font-light mb-3">
+            {personal.fullName || "Your Name"}
+          </h1>
 
-          {personal.phone && (
-            <div className="flex items-center gap-2">
-              <Phone className="size-4" />
-              {personal.phone}
-            </div>
-          )}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm">
+            {personal.email && (
+              <div className="flex items-center gap-2">
+                <Mail className="size-4" />
+                {personal.email}
+              </div>
+            )}
 
-          {personal.location && (
-            <div className="flex items-center gap-2">
-              <MapPin className="size-4" />
-              {personal.location}
-            </div>
-          )}
+            {personal.phone && (
+              <div className="flex items-center gap-2">
+                <Phone className="size-4" />
+                {personal.phone}
+              </div>
+            )}
 
-          {personal.linkedin && (
-            <a
-              target="_blank"
-              rel="noreferrer"
-              href={personal.linkedin}
-              className="flex items-center gap-2"
-            >
-              <Linkedin className="size-4" />
-              <span className="break-all text-xs">
-                {personal.linkedin.replace("https://www.", "")}
-              </span>
-            </a>
-          )}
+            {personal.location && (
+              <div className="flex items-center gap-2">
+                <MapPin className="size-4" />
+                {personal.location}
+              </div>
+            )}
 
-          {personal.website && (
-            <a
-              target="_blank"
-              rel="noreferrer"
-              href={personal.website}
-              className="flex items-center gap-2"
-            >
-              <Globe className="size-4" />
-              <span className="break-all text-xs">
-                {personal.website.replace("https://", "")}
-              </span>
-            </a>
-          )}
+            {personal.linkedin && (
+              <a
+                target="_blank"
+                rel="noreferrer"
+                href={personal.linkedin}
+                className="flex items-center gap-2"
+              >
+                <Linkedin className="size-4" />
+                <span className="break-all text-xs">
+                  {personal.linkedin.replace("https://www.", "")
+}
+                </span>
+              </a>
+            )}
+
+            {personal.website && (
+              <a
+                target="_blank"
+                rel="noreferrer"
+                href={personal.website}
+                className="flex items-center gap-2"
+              >
+                <Globe className="size-4" />
+                <span className="break-all text-xs">
+                  {personal.website.replace("https://", "")}
+                </span>
+              </a>
+            )}
+          </div>
         </div>
       </header>
 
@@ -78,7 +99,10 @@ const ModernTemplate = ({ data, accentColor }) => {
         {/* SUMMARY */}
         {data.professionalSummary && (
           <section className="mb-8">
-            <h2 className="text-2xl font-light mb-4 pb-2 border-b border-gray-200">
+            <h2
+              className="text-2xl font-light mb-4 pb-2 border-b"
+              style={{ borderColor: accentColor, color: accentColor }}
+            >
               Professional Summary
             </h2>
             <p className="text-gray-700">
@@ -90,13 +114,20 @@ const ModernTemplate = ({ data, accentColor }) => {
         {/* EXPERIENCE */}
         {data.experience?.length > 0 && (
           <section className="mb-8">
-            <h2 className="text-2xl font-light mb-6 pb-2 border-b border-gray-200">
+            <h2
+              className="text-2xl font-light mb-6 pb-2 border-b"
+              style={{ borderColor: accentColor, color: accentColor }}
+            >
               Experience
             </h2>
 
             <div className="space-y-6">
               {data.experience.map((exp, index) => (
-                <div key={index} className="relative pl-6 border-l border-gray-200">
+                <div
+                  key={index}
+                  className="relative pl-6 border-l"
+                  style={{ borderLeftColor: accentColor }}
+                >
 
                   <div className="flex justify-between items-start mb-2">
                     <div>
@@ -128,7 +159,10 @@ const ModernTemplate = ({ data, accentColor }) => {
         {/* PROJECTS */}
         {data.projects?.length > 0 && (
           <section className="mb-8">
-            <h2 className="text-2xl font-light mb-4 pb-2 border-b border-gray-200">
+            <h2
+              className="text-2xl font-light mb-4 pb-2 border-b"
+              style={{ borderColor: accentColor, color: accentColor }}
+            >
               Projects
             </h2>
 
@@ -136,7 +170,7 @@ const ModernTemplate = ({ data, accentColor }) => {
               {data.projects.map((p, index) => (
                 <div
                   key={index}
-                  className="relative pl-6 border-l border-gray-200"
+                  className="relative pl-6 border-l"
                   style={{ borderLeftColor: accentColor }}
                 >
                   <h3 className="text-lg font-medium text-gray-900">
@@ -162,8 +196,8 @@ const ModernTemplate = ({ data, accentColor }) => {
         {data.education?.length > 0 && (
           <section className="mb-10">
             <h2
-              className="text-2xl font-light mb-4 pb-2 border-b border-gray-200"
-              style={{ color: accentColor }}
+              className="text-2xl font-light mb-4 pb-2 border-b"
+              style={{ borderColor: accentColor, color: accentColor }}
             >
               Education
             </h2>
@@ -172,7 +206,6 @@ const ModernTemplate = ({ data, accentColor }) => {
               {data.education.map((edu, index) => (
                 <div key={index} className="flex justify-between items-start">
 
-                  {/* LEFT */}
                   <div>
                     <h3 className="font-semibold text-gray-900">
                       {edu.degree} {edu.field && `in ${edu.field}`}
@@ -183,7 +216,6 @@ const ModernTemplate = ({ data, accentColor }) => {
                     </p>
                   </div>
 
-                  {/* RIGHT (DATE + CGPA) */}
                   <div className="text-right text-sm text-gray-600">
                     <div>{formatDate(edu.graduationDate)}</div>
 
@@ -203,12 +235,12 @@ const ModernTemplate = ({ data, accentColor }) => {
           </section>
         )}
 
-        {/* SKILLS BELOW EDUCATION */}
+        {/* SKILLS */}
         {data.skills?.length > 0 && (
           <section>
             <h2
-              className="text-2xl font-light mb-4 pb-2 border-b border-gray-200"
-              style={{ color: accentColor }}
+              className="text-2xl font-light mb-4 pb-2 border-b"
+              style={{ borderColor: accentColor, color: accentColor }}
             >
               Skills
             </h2>

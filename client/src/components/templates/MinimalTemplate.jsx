@@ -1,4 +1,6 @@
 const MinimalTemplate = ({ data, accentColor }) => {
+  const color = accentColor || "#4f46e5"; // ✅ fallback fix
+
   const formatDate = (dateStr) => {
     if (!dateStr || !dateStr.includes("-")) return "";
     const [year, month] = dateStr.split("-");
@@ -14,14 +16,14 @@ const MinimalTemplate = ({ data, accentColor }) => {
     <div
       className="max-w-4xl mx-auto p-8 text-gray-900 font-light"
       style={{
-        background: `linear-gradient(135deg, ${accentColor}15, white)`
+        background: `linear-gradient(135deg, ${color}15, white)`
       }}
     >
 
       {/* HEADER */}
       <header
         className="mb-10"
-        style={{ borderBottom: `1px solid ${accentColor}30`, paddingBottom: "16px" }}
+        style={{ borderBottom: `1px solid ${color}30`, paddingBottom: "16px" }}
       >
         <h1 className="text-4xl font-thin mb-4 tracking-wide">
           {personal.fullName || "Your Name"}
@@ -54,7 +56,7 @@ const MinimalTemplate = ({ data, accentColor }) => {
         <section className="mb-10">
           <h2
             className="text-sm uppercase tracking-widest mb-6 font-medium"
-            style={{ color: accentColor }}
+            style={{ color }}
           >
             Experience
           </h2>
@@ -73,7 +75,7 @@ const MinimalTemplate = ({ data, accentColor }) => {
                   </span>
                 </div>
 
-                <p className="mb-2" style={{ color: accentColor }}>
+                <p className="mb-2" style={{ color }}>
                   {exp.company}
                 </p>
 
@@ -93,7 +95,7 @@ const MinimalTemplate = ({ data, accentColor }) => {
         <section className="mb-10">
           <h2
             className="text-sm uppercase tracking-widest mb-6 font-medium"
-            style={{ color: accentColor }}
+            style={{ color }}
           >
             Projects
           </h2>
@@ -104,7 +106,7 @@ const MinimalTemplate = ({ data, accentColor }) => {
                 <h3 className="text-medium font-medium">{proj.name}</h3>
 
                 {proj.type && (
-                  <p className="text-sm" style={{ color: accentColor }}>
+                  <p className="text-sm" style={{ color }}>
                     {proj.type}
                   </p>
                 )}
@@ -121,7 +123,7 @@ const MinimalTemplate = ({ data, accentColor }) => {
         <section className="mb-10">
           <h2
             className="text-sm uppercase tracking-widest mb-6 font-medium"
-            style={{ color: accentColor }}
+            style={{ color }}
           >
             Education
           </h2>
@@ -146,10 +148,7 @@ const MinimalTemplate = ({ data, accentColor }) => {
                   <p className="text-gray-700">{edu.institution}</p>
 
                   {edu.gpa && (
-                    <span
-                      className="text-sm"
-                      style={{ color: accentColor }}
-                    >
+                    <span className="text-sm" style={{ color }}>
                       CGPA: {edu.gpa}
                     </span>
                   )}
@@ -166,7 +165,7 @@ const MinimalTemplate = ({ data, accentColor }) => {
         <section>
           <h2
             className="text-sm uppercase tracking-widest mb-6 font-medium"
-            style={{ color: accentColor }}
+            style={{ color }}
           >
             Skills
           </h2>

@@ -4,21 +4,27 @@ import MinimalImageTemplate from './templates/MinimalImageTemplate'
 import MinimalTemplate from './templates/MinimalTemplate'
 import ModernTemplate from './templates/ModernTemplate'
 
-const ResumePreview = ({data,template,accentColor,classes=""}) => {
-     
-    const renderTemplate=()=>{
-        switch (template) {
-            case "modern":
-                return <ModernTemplate data={data} accentColor={accentColor}/>;
-            case "minimal":
-                return <MinimalTemplate data={data} accentColor={accentColor}/>;
-            case "minimal-image":
-                return <MinimalImageTemplate data={data} accentColor={accentColor}/>;   
-            
-            default:
-                return <ClassicTemplate data={data} accentColor={accentColor}/>;   
-        }
+const ResumePreview = ({ data, template, accentColor, classes = "" }) => {
+
+  // ✅ GLOBAL FIX (works for all templates)
+  const finalAccentColor =
+    accentColor || data?.accentColor || "#3882F6";
+
+  const renderTemplate = () => {
+    switch (template) {
+      case "modern":
+        return <ModernTemplate data={data} accentColor={finalAccentColor} />;
+
+      case "minimal":
+        return <MinimalTemplate data={data} accentColor={finalAccentColor} />;
+
+      case "minimal-image":
+        return <MinimalImageTemplate data={data} accentColor={finalAccentColor} />;
+
+      default:
+        return <ClassicTemplate data={data} accentColor={finalAccentColor} />;
     }
+  };
 
   return (
     <div className='w-full bg-gray-100'>
