@@ -44,7 +44,8 @@ const App = () => {
     <Toaster/>
       <Routes>
         <Route path='/' element={<Home />}/>
-
+        <Route path='/login' element={<Login />}/> 
+        <Route path='/signup' element={<Login />}/>
         <Route path='app' element={<Layout />}>
            <Route index element={<Dashboard />}/>
             <Route path='builder/:resumeId' element={<ResumeBuilder />}/>
