@@ -5,7 +5,7 @@ import MinimalTemplate from './templates/MinimalTemplate'
 import ModernTemplate from './templates/ModernTemplate'
 
 const ResumePreview = ({data,template,accentColor,classes=""}) => {
-
+     
     const renderTemplate=()=>{
         switch (template) {
             case "modern":

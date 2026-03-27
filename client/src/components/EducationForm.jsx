@@ -8,7 +8,7 @@ const EducationForm = ({ data, onChange }) => {
       institution: "",
       degree: "",
       field: "",
-      graduation_date: "",
+      graduationDate: "",
       gpa: "",
     };
     onChange([...data, newEducation]);
@@ -107,9 +107,9 @@ const EducationForm = ({ data, onChange }) => {
                 />
 
                 <input
-                  value={education.graduation_date || ""}
+                  value={education.graduationDate || ""}
                   onChange={(e) =>
-                    updateEducation(index, "graduation_date", e.target.value)
+                    updateEducation(index, "graduationDate", e.target.value)
                   }
                   type="date"
                   className="px-3 py-2 text-sm  "
