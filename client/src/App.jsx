@@ -19,7 +19,7 @@ const App = () => {
     const token = localStorage.getItem('token');
     try {
       if (token) {
-        const { data } = await api.get('/api/users/data', {
+        const { data } = await api.get('https://resume-maker-backend-rt1b.onrender.com/api/users/data', {
           headers: { Authorization: `Bearer ${token}` }
         });
         if (data.user) {
