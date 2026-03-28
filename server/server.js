@@ -16,7 +16,7 @@ const startServer = async () => {
   app.use(express.json());
   app.use(cors({
     origin: "*", // your frontend
-    credentials: true
+    
   }));
 
   app.get('/', (req, res) => res.send("Server is live..."));
