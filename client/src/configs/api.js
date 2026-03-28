@@ -1,8 +1,11 @@
-import axios from 'axios'
+import axios from 'axios';
 
 const api = axios.create({
-    baseURL: import.meta.env.VITE_API_URL || 'http://localhost:3000',
-    withCredentials:true
-})
+  baseURL: import.meta.env.VITE_API_URL || 'http://localhost:3000',
+  withCredentials: true,  // allows cookies if you use them
+  headers: {
+    'Content-Type': 'application/json'
+  }
+});
 
-export default api
+export default api;
