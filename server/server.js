@@ -6,25 +6,28 @@ import userRouter from "./routes/userRoutes.js";
 import resumeRouter from "./routes/resumeRoutes.js";
 import aiRouter from "./routes/aiRoutes.js";
 
+const app = express();
+const PORT = process.env.PORT || 3000;
 
-const app =express();
-const PORT =process.env.PORT || 3000;
+const startServer = async () => {
+  // Database connection
+  await connectDB();
 
-// Database connection
+  app.use(express.json());
+  app.use(cors({
+    origin: "https://resume-maker-pink-eta.vercel.app", // your frontend
+    credentials: true
+  }));
 
-await connectDB()
+  app.get('/', (req, res) => res.send("Server is live..."));
 
-app.use(express.json())
-app.use(cors({
-    origin:"https://resume-maker-pink-eta.vercel.app/",
-    origin:"*",
-}))
+  app.use('/api/users', userRouter);
+  app.use('/api/resumes', resumeRouter);
+  app.use('/api/ai', aiRouter);
 
-app.get('/',(req,res)=>res.send("Server is live..."))
-app.use('/api/users',userRouter)
-app.use('/api/resumes',resumeRouter)
-app.use('/api/ai',aiRouter)
-
-app.listen(PORT,()=>{
+  app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
-});
+  });
+};
+
+startServer();
