@@ -1,3 +1,4 @@
+ console.log("NEW BUILD");
 import React, { useEffect } from 'react';
 import { Route, Routes } from 'react-router-dom';
 import Home from './pages/Home';
@@ -19,7 +20,7 @@ const App = () => {
     const token = localStorage.getItem('token');
     try {
       if (token) {
-        const { data } = await api.get('https://resume-maker-backend-rt1b.onrender.com/api/users/data', {
+        const { data } = await api.get('/api/users/data', {
           headers: { Authorization: `Bearer ${token}` }
         });
         if (data.user) {
