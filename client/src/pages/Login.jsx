@@ -21,7 +21,7 @@ const Login = () => {
         e.preventDefault()
 
         try {
-            const {data} =await api.post(`/api/users/${state}`,formData)
+            const {data} =await api.post(`https://resume-maker-backend-rt1b.onrender.com/api/users/${state}`,formData)
             dispatch(login(data))
             localStorage.setItem('token',data.token)
             toast.success(data.message)
