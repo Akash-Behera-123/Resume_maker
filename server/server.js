@@ -15,7 +15,7 @@ const startServer = async () => {
 
   app.use(express.json());
   app.use(cors({
-    origin: "https://resume-maker-pink-eta.vercel.app", // your frontend
+    origin: "*", // your frontend
     credentials: true
   }));
 
